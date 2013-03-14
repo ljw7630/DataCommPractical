@@ -62,15 +62,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="receiver_preprocess.py">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="X.04" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Localization.cpp">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
     </ClCompile>
+    <ClCompile Include="ReceiverReader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Calculator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="out.txt">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

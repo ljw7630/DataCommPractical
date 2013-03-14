@@ -16,7 +16,7 @@ BY AN INFINITE LINE SOURCE. SEE PAGE 680 -BALANIS.
 #include <vector>
 #include <map>
 #include "Calculator.h"
-
+#include "ReceiverReader.h"
 using namespace std;
 
 #define EXP	    2.718281828
@@ -64,6 +64,8 @@ double  X[385],Y[385],Mx[1110], My[1110], Seg_Length=Lambda/4.0;
 
 const complex j=complex(0.0,1.0);
 
+int No_Residual_Surfaces=7;
+
 void localization ()
 {
 	FILE *fp1; 
@@ -75,7 +77,7 @@ void localization ()
 	ifstream cinput2;
 
 	int Terr_Length, m, n, z, w, X_Index, Y_Index, Tuple_No, No_Grps, Start, Grp_No, Group_No_Receiver_1, Group_No_Receiver_2, Group_No_Source;
-	int No_Residual_Surfaces=7, Window_Size=2;
+	int Window_Size=2;
 
 	complex Zself, Hself, Sigma, Sum, Const;
 
@@ -90,8 +92,9 @@ void localization ()
 	double Observed_Primary_Field_Difference_1_2, Observed_Primary_Field_Difference_2_1,Total_SS, Minimum[3], Temp;
 	vector<double> Residual(No_Grps), Difference_Secondary_Fields_1_2(No_Grps);
 
-	double Xsource = 0.0, Ysource=16.4, 
+	double Xsource = 0.0, Ysource=16.4,
 
+		/*
 		Xreceiver_A=1500.0, Yreceiver_A=7.4, Mreceiver_A=-100.573, 
 		Xreceiver_B=5500.0, Yreceiver_B=46.4, Mreceiver_B=-107.0, 
 
@@ -112,9 +115,10 @@ void localization ()
 
 		Xreceiver_Err1=3800.0, Yreceiver_Err1=36.4, Mreceiver_Err1=-115.01,
 		Xreceiver_Err2=6300.0, Yreceiver_Err2=40.8,Mreceiver_Err2=-132.54,
-
+		 */
 		Obs;
 
+	/*
 	vector<vector<double> > Receiver_Tuple_Array(No_Residual_Surfaces, vector<double> (7));
 
 	// Receiver Pairs are: A,D  B,E  C,F
@@ -167,6 +171,9 @@ void localization ()
 	Receiver_Tuple_Array[6][4]=Xreceiver_Err2;
 	Receiver_Tuple_Array[6][5]=Yreceiver_Err2;
 	Receiver_Tuple_Array[6][6]=Mreceiver_Err2;
+	*/
+	ReceiverReader reader(No_Residual_Surfaces);
+	vector<vector<double> > Receiver_Tuple_Array = reader.getReceiverTupleArray();
 
 	double Xreceiver1, Yreceiver1, Mreceiver1, Xreceiver2,Yreceiver2, Mreceiver2;
 
@@ -554,8 +561,10 @@ double R_surf_obs(double obs, int p, int q)
 		(((y(q,Y)+obs)-y(p,Y))*((y(q,Y)+obs)-y(p,Y)))));
 }
 
-int main()
+int main(int argc, char * argv[])
 {
+	No_Residual_Surfaces = atoi(argv[1]);
+	
 	localization();
 	system("pause");
 	return 0;
