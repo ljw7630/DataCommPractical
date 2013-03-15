@@ -5,6 +5,8 @@
 #include <algorithm>
 using namespace std;
 
+extern double Xsource, Ysource;
+
 template<typename A, typename B>
 class CompPairBySecondElement{
 	bool operator() (const pair<A, B> &p1, const pair<A, B> &p2){
@@ -57,19 +59,51 @@ public:
 		getMapOfResidualSignalStrengthSurfacesByXYPair(Residual_Signal_Strength_Surfaces_Vec, Residual_Signal_Strength_Surfaces_Map);
 
 		calErrorSum(Residual_Signal_Strength_Surfaces_Vec, rateErrSum);
-		calIndexSum(Residual_Signal_Strength_Surfaces_Vec, 5, rateIndexSum);
+		calIndexSum(Residual_Signal_Strength_Surfaces_Vec, rateIndexSum);
 		calWeightedSum(Residual_Signal_Strength_Surfaces_Vec, rateWeightSum);
 
 		findMin(rateErrSum, 5, results);
+		cout << "rateErrSum: " << endl;
 		printResults(results);
+		printCorrectResult(rateErrSum);
 
 		findMin(rateIndexSum, 5, results);
+		cout << "rateIndexSum: " << endl;
 		printResults(results);
+		printCorrectResult(rateIndexSum);
 
 		findMin(rateWeightSum, 5, results);
+		cout << "rateWeightSum: " << endl;
 		printResults(results);
+		printCorrectResult(rateWeightSum);
+
+		// calErrorSum(Residual_Signal_Strength_Surfaces_Vec, rateErrSum);
+		calIndexSum(Residual_Signal_Strength_Surfaces_Vec, 5, rateIndexSum);
+		calWeightedSum(Residual_Signal_Strength_Surfaces_Vec, 5, rateWeightSum);
+
+		findMin(rateErrSum, 5, results);
+		cout << "rateErrSum: " << endl;
+		printResults(results);
+		printCorrectResult(rateErrSum);
+
+		findMin(rateIndexSum, 5, results);
+		cout << "rateIndexSum: " << endl;
+		printResults(results);
+		printCorrectResult(rateIndexSum);
+
+		findMin(rateWeightSum, 5, results);
+		cout << "rateWeightSum: " << endl;
+		printResults(results);
+		printCorrectResult(rateWeightSum);
 
 		// random print
+	}
+
+	void printCorrectResult(map<pair<int, int>, double> &res){
+		cout << "Correct Result:" << endl;
+		cout << "XSource: " << (int)Xsource << " YSource: " << (int)Ysource;
+		cout << " " << " Result: " << res[make_pair((int)Xsource,(int)Ysource)] << endl;
+		cout << endl;
 	}
 
 	void getVectorOfResidualSignalStrengthSurfacesByXYPair(

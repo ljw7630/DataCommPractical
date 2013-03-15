@@ -6,25 +6,31 @@ ymax = 491
 
 def getXM():
 	f = open('mhad435.10m', 'r')
-	x = []
+	map = {}
 	for line in f.readlines():
 		if line.startswith('%'):
 			continue
 		y = [float(value) for value in line.split()]
-		x.append(y)
+		map[y[0]] = y[1]
 		
 	f.close()
-	return x
+	return map
 
-def constructXYM(srcx):
-	li = getXM()
-	returnlist = []
-	for x,m in li:
-		y = float(random.randrange(0, ymax))/10
-		returnlist.append([srcx+x,y,m])
-	return returnlist
+def constructXYM(srcx=0):
+	map = getXM()
 
-def getRandomPairs(srcx, k):
+	xylist = []
+	f = open('hadsund.dhm')
+	for line in f.readlines():
+		p = [float(value) for value in line.split()]
+		p[1] += 2.4
+		if abs(p[0]-srcx) in map:
+			p.append(map[abs(p[0]-srcx)])
+			xylist.append(p)
+
+	return xylist
+
+def getRandomPairs(k, srcx=0):
 	li = constructXYM(srcx)
 	tmpSet = Set()
 	res = []
@@ -33,6 +39,7 @@ def getRandomPairs(srcx, k):
 			idx = random.randrange(len(li))			
 			if idx not in tmpSet:
 				res.append(li[idx])
+				tmpSet.add(idx)
 				break
 	writeToFile(res)
 

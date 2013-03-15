@@ -17,6 +17,12 @@
   <ItemGroup>
     <None Include="X.04" />
     <None Include="receiver_preprocess.py" />
+    <None Include="hadsund.dhm">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="mhad435.10m">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Localization.cpp">

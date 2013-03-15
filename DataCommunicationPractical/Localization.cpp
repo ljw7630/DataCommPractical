@@ -19,6 +19,8 @@ BY AN INFINITE LINE SOURCE. SEE PAGE 680 -BALANIS.
 #include "ReceiverReader.h"
 using namespace std;
 
+// #define DISABLE
+
 #define EXP	    2.718281828
 #define PI          3.14159265358979323846
 #define CONJ -1
@@ -56,6 +58,8 @@ void SortPairsByValue(const vector< vector< vector<double> > > &Residual_Signal_
 
 const int Groupsize=80;
 
+double Xsource = 0.0, Ysource=8.4, Obs;
+
 const double  Epsilon_0=8.854e-12,Mu_0=PI*(4.0e-7), 
 	Gross_Step=50.0,c=(1.0/sqrt(Mu_0*Epsilon_0)),
 	f=435e6,Lambda=c/f, Omega=2.0*PI*f, Beta_0=Omega*(sqrt(Mu_0*Epsilon_0)),
@@ -92,9 +96,8 @@ void localization ()
 	double Observed_Primary_Field_Difference_1_2, Observed_Primary_Field_Difference_2_1,Total_SS, Minimum[3], Temp;
 	vector<double> Residual(No_Grps), Difference_Secondary_Fields_1_2(No_Grps);
 
-	double Xsource = 0.0, Ysource=16.4,
-
-		/*
+#ifdef DISABLE
+	double 
 		Xreceiver_A=1500.0, Yreceiver_A=7.4, Mreceiver_A=-100.573, 
 		Xreceiver_B=5500.0, Yreceiver_B=46.4, Mreceiver_B=-107.0, 
 
@@ -114,11 +117,8 @@ void localization ()
 		Xreceiver_M=5750.0, Yreceiver_M=58.6,Mreceiver_M=-109.4,
 
 		Xreceiver_Err1=3800.0, Yreceiver_Err1=36.4, Mreceiver_Err1=-115.01,
-		Xreceiver_Err2=6300.0, Yreceiver_Err2=40.8,Mreceiver_Err2=-132.54,
-		 */
-		Obs;
+		Xreceiver_Err2=6300.0, Yreceiver_Err2=40.8,Mreceiver_Err2=-132.54;
 
-	/*
 	vector<vector<double> > Receiver_Tuple_Array(No_Residual_Surfaces, vector<double> (7));
 
 	// Receiver Pairs are: A,D  B,E  C,F
@@ -171,9 +171,15 @@ void localization ()
 	Receiver_Tuple_Array[6][4]=Xreceiver_Err2;
 	Receiver_Tuple_Array[6][5]=Yreceiver_Err2;
 	Receiver_Tuple_Array[6][6]=Mreceiver_Err2;
-	*/
+#endif
+
+#ifndef DISABLE
 	ReceiverReader reader(No_Residual_Surfaces);
 	vector<vector<double> > Receiver_Tuple_Array = reader.getReceiverTupleArray();
+	reader.print();
+#endif
+
+	cout << endl << "start processing: " << endl;
 
 	double Xreceiver1, Yreceiver1, Mreceiver1, Xreceiver2,Yreceiver2, Mreceiver2;
 
@@ -389,100 +395,6 @@ void localization ()
 
 } /* Main*/
 
-/*
-class cmp{
-public:
-	bool operator() (pair<pair<int, int>, double>&p1, pair<pair<int, int>, double>&p2){
-		return p1.second < p2.second;
-	}
-};
-
-void SortPairsByValue(const vector< vector< vector<double> > > &Residual_Signal_Strength_Surfaces
-					  , int No_Residual_Surfaces, int No_Grps){
-
-	vector< vector< pair<pair<int, int>, double> > > Residual_Signal_Strength_Surfaces_Vec;
-
-	for(int tupleNo = 0; tupleNo<=No_Residual_Surfaces-1; tupleNo++){
-		vector<pair<pair<int, int>, double>> vec;
-		for(int xIdx = 0; xIdx <= No_Grps-1; xIdx++){
-			for (int yIdx = 0; yIdx <= 49; yIdx++){
-				vec.push_back(make_pair(make_pair(xIdx, yIdx), Residual_Signal_Strength_Surfaces[tupleNo][xIdx][yIdx]));
-			}
-		}
-		Residual_Signal_Strength_Surfaces_Vec.push_back(vec);
-	}
-
-	for(int i=0;i<Residual_Signal_Strength_Surfaces_Vec.size();++i){
-		sort(Residual_Signal_Strength_Surfaces_Vec[i].begin(), Residual_Signal_Strength_Surfaces_Vec[i].end(), cmp());
-	}
-
-	map<pair<int, int>, vector<pair<int, double> > > rateSequence;
-
-	// weighted sum, sorted_index * value
-	map<pair<int, int>, double> rateWeightSum;
-
-	// index_sum, the index is in sorted array
-	map<pair<int, int> , int> rateIndexSum;
-
-	// sum
-	map<pair<int, int>, double> rateSum;
-	for(int x = 0; x<=No_Grps-1; ++x){
-		for(int y = 0; y<=49;++y){
-			rateSequence.insert(make_pair(make_pair(x,y), vector<pair<int, double> >()));
-		}
-	}
-	
-	for(int tupleNo = 0; tupleNo<=No_Residual_Surfaces-1; tupleNo++){
-		for(int i=0;i<Residual_Signal_Strength_Surfaces_Vec[tupleNo].size();++i){
-			auto itr = rateSequence.find(Residual_Signal_Strength_Surfaces_Vec[tupleNo][i].first);
-			itr->second.push_back(make_pair(i, Residual_Signal_Strength_Surfaces_Vec[tupleNo][i].second));
-			rateWeightSum[Residual_Signal_Strength_Surfaces_Vec[tupleNo][i].first]+= (i+1)*Residual_Signal_Strength_Surfaces_Vec[tupleNo][i].second;
-			rateIndexSum[Residual_Signal_Strength_Surfaces_Vec[tupleNo][i].first]+=i;
-			rateSum[Residual_Signal_Strength_Surfaces_Vec[tupleNo][i].first]+=Residual_Signal_Strength_Surfaces_Vec[tupleNo][i].second;
-		}
-	}
-
-	int minXIdx=0, minYIdx=0;
-	double mini = 1e10;
-	for(auto itr = rateWeightSum.begin(); itr!=rateWeightSum.end();++itr){
-		if(mini > itr->second){
-			mini = itr->second;
-			minXIdx = itr->first.first;
-			minYIdx = itr->first.second;
-		}
-	}
-	cout << "weighted sum: " << endl;
-	cout << minXIdx << " " << minYIdx << " " << " " << mini << endl;
-	cout << x(minXIdx) << " " << minYIdx << " " << endl;
-
-	minXIdx=0, minYIdx = 0;
-	mini = 1e10;
-	for(auto itr = rateIndexSum.begin(); itr!=rateIndexSum.end();++itr){
-		if(mini > itr->second){
-			mini = itr->second;
-			minXIdx = itr->first.first;
-			minYIdx = itr->first.second;
-		}
-	}
-	cout << "index sum: " << endl;
-	cout << minXIdx << " " << minYIdx << " " << " " << mini << endl;
-	cout << x(minXIdx) << " " << minYIdx << " " << endl;
-
-	minXIdx=0, minYIdx=0;
-	mini = 1e10;
-	for(auto itr = rateSum.begin(); itr!=rateSum.end();++itr){
-		if(mini > itr->second){
-			mini = itr->second;
-			minXIdx = itr->first.first;
-			minYIdx = itr->first.second;
-		}
-	}
-	cout << "error sum: " << endl;
-	cout << minXIdx << " " << minYIdx << " " << " " << mini << endl;
-	cout << x(minXIdx) << " " << minYIdx << " " << endl;
-}
-*/
-
 double Mod(complex Z)
 {
 	return(sqrt((Z.real()*Z.real())+(Z.imag()*Z.imag())));
@@ -563,10 +475,15 @@ double R_surf_obs(double obs, int p, int q)
 
 int main(int argc, char * argv[])
 {
+#ifndef DISABLE
 	No_Residual_Surfaces = atoi(argv[1]);
-	
+#endif
 	localization();
+
+#ifdef DISABLE
 	system("pause");
+#endif
+
 	return 0;
 }
 
