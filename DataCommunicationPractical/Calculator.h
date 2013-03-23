@@ -3,6 +3,9 @@
 #include <utility>
 #include <map>
 #include <algorithm>
+#include <fstream>
+#include "FilePrinter.h"
+
 using namespace std;
 
 extern double Xsource, Ysource;
@@ -45,9 +48,14 @@ public:
 	}
 
 	void calculate(const vector< vector< vector<double> > > &Residual_Signal_Strength_Surfaces){
+		cout << "Calculate" << endl;
+
+		FilePrinter fp;
+
 		vector< vector< pair<pair<int, int>, double> > > Residual_Signal_Strength_Surfaces_Vec;
 		map<pair<int, int>, vector<pair<int, double> > > Residual_Signal_Strength_Surfaces_Map;
 
+		map<pair<int, int>, double> rateAverageSum;
 		map<pair<int, int>, double> rateErrSum;
 		map<pair<int, int>, double> rateIndexSum;
 		map<pair<int, int>, double> rateWeightSum;
@@ -59,51 +67,46 @@ public:
 		getMapOfResidualSignalStrengthSurfacesByXYPair(Residual_Signal_Strength_Surfaces_Vec, Residual_Signal_Strength_Surfaces_Map);
 
 		calErrorSum(Residual_Signal_Strength_Surfaces_Vec, rateErrSum);
+		calAverageErrorSum(rateAverageSum, rateErrSum);
 		calIndexSum(Residual_Signal_Strength_Surfaces_Vec, rateIndexSum);
 		calWeightedSum(Residual_Signal_Strength_Surfaces_Vec, rateWeightSum);
 
+		findMin(rateAverageSum, 5, results);
+		fp.writeError("rateAverageSum1.txt", rateAverageSum);
+		fp.writeResult("rateAverageSum1Result.txt", results);
+		fp.writeCorrectResult("rateAverageSum1Result_Correct.txt", rateAverageSum, Xsource, Ysource);
+
 		findMin(rateErrSum, 5, results);
-		cout << "rateErrSum: " << endl;
-		printResults(results);
-		printCorrectResult(rateErrSum);
+		fp.writeError("rateErrSum1.txt", rateErrSum);
+		fp.writeResult("rateErrSum1Result.txt", results);
+		fp.writeCorrectResult("rateErrSum1Result_Correct.txt", rateErrSum, Xsource, Ysource);
+
 
 		findMin(rateIndexSum, 5, results);
-		cout << "rateIndexSum: " << endl;
-		printResults(results);
-		printCorrectResult(rateIndexSum);
+		fp.writeError("rateIndexSum1.txt", rateIndexSum);
+		fp.writeResult("rateIndexSum1Result.txt", results);
+		fp.writeCorrectResult("rateIndexSum1Result_Correct.txt", rateIndexSum, Xsource, Ysource);
 
 		findMin(rateWeightSum, 5, results);
-		cout << "rateWeightSum: " << endl;
-		printResults(results);
-		printCorrectResult(rateWeightSum);
+		fp.writeError("rateWeightSum1.txt", rateWeightSum);
+		fp.writeResult("rateWeightSum1Result.txt", results);
+		fp.writeCorrectResult("rateWeightSum1Result_Correct.txt", rateWeightSum, Xsource, Ysource);
 
 		// calErrorSum(Residual_Signal_Strength_Surfaces_Vec, rateErrSum);
 		calIndexSum(Residual_Signal_Strength_Surfaces_Vec, 5, rateIndexSum);
 		calWeightedSum(Residual_Signal_Strength_Surfaces_Vec, 5, rateWeightSum);
 
-		findMin(rateErrSum, 5, results);
-		cout << "rateErrSum: " << endl;
-		printResults(results);
-		printCorrectResult(rateErrSum);
-
 		findMin(rateIndexSum, 5, results);
-		cout << "rateIndexSum: " << endl;
-		printResults(results);
-		printCorrectResult(rateIndexSum);
+		fp.writeError("rateIndexSum2.txt", rateIndexSum);
+		fp.writeResult("rateIndexSum2Result.txt", results);
+		fp.writeCorrectResult("rateIndexSum2Result_Correct.txt", rateIndexSum, Xsource, Ysource);
 
 		findMin(rateWeightSum, 5, results);
-		cout << "rateWeightSum: " << endl;
-		printResults(results);
-		printCorrectResult(rateWeightSum);
+		fp.writeError("rateWeightSum2.txt", rateWeightSum);
+		fp.writeResult("rateWeightSum2Result.txt", results);
+		fp.writeCorrectResult("rateWeightSum2Result_Correct.txt", rateWeightSum, Xsource, Ysource);
 
 		// random print
-	}
-
-	void printCorrectResult(map<pair<int, int>, double> &res){
-		cout << "Correct Result:" << endl;
-		cout << "XSource: " << (int)Xsource << " YSource: " << (int)Ysource;
-		cout << " " << " Result: " << res[make_pair((int)Xsource,(int)Ysource)] << endl;
-		cout << endl;
 	}
 
 	void getVectorOfResidualSignalStrengthSurfacesByXYPair(
@@ -119,7 +122,7 @@ public:
 				Residual_Signal_Strength_Surfaces_Vec.push_back(vec);
 			}
 
-			for(int i=0;i<Residual_Signal_Strength_Surfaces_Vec.size();++i){
+			for(auto i=0;i<Residual_Signal_Strength_Surfaces_Vec.size();++i){
 				sort(Residual_Signal_Strength_Surfaces_Vec[i].begin(), Residual_Signal_Strength_Surfaces_Vec[i].end(), Calculator());
 			}	
 	}
@@ -145,10 +148,30 @@ public:
 		vector< vector< pair<pair<int, int>, double> > > & Residual_Signal_Strength_Surfaces_Vec, 
 		map<pair<int, int>, double> &rateErrSum){
 			for(int tupleNo = 0; tupleNo<=No_Residual_Surfaces-1; tupleNo++){
-				for(int i=0;i<Residual_Signal_Strength_Surfaces_Vec[tupleNo].size();++i){
+				for(auto i=0;i<Residual_Signal_Strength_Surfaces_Vec[tupleNo].size();++i){
 					rateErrSum[Residual_Signal_Strength_Surfaces_Vec[tupleNo][i].first]+=Residual_Signal_Strength_Surfaces_Vec[tupleNo][i].second;
 				}
 			}
+	}
+
+	void calAverageErrorSum(map<pair<int, int>, double > &rateAverageErrSum,
+		map<pair<int, int>, double> &rateErrSum){
+			rateAverageErrSum[make_pair(0,0)] = rateErrSum[make_pair(0,0)];
+			
+		// X domains
+		for(int yIdx = 0; yIdx <= 49; ++yIdx){
+			for(int xIdx = 1; xIdx <= No_Grps-1; ++xIdx){
+				rateAverageErrSum[make_pair(xIdx, yIdx)] = (rateErrSum[make_pair(xIdx, yIdx)] +
+					rateErrSum[make_pair(xIdx-1, yIdx)])/2.0;
+			}
+		}
+		// Y domains
+		for (int xIdx=0; xIdx<=No_Grps-1; ++xIdx) {
+			for (int yIdx=1; yIdx<=49; ++yIdx) {
+				rateAverageErrSum[make_pair(xIdx,yIdx)] = (rateErrSum[make_pair(xIdx, yIdx)] +
+					rateErrSum[make_pair(xIdx, yIdx-1)])/2.0;
+			}
+		}
 	}
 
 	void calIndexSum(
@@ -208,7 +231,7 @@ public:
 		return make_pair(idx, mini);
 	}
 
-	void findMin(map<pair<int, int> , double> & resultMap, int k, vector<pair<double, pair<int,int> > > &arr){
+	void findMin(map<pair<int, int> , double> & resultMap, unsigned int k, vector<pair<double, pair<int,int> > > &arr){
 		map<double, pair<int, int> > valueMap = flipMap(resultMap);
 		arr.clear();	
 		for(auto itr=valueMap.begin();itr!=valueMap.end();++itr){
@@ -216,24 +239,5 @@ public:
 			if(arr.size()>=k)
 				break;
 		}
-	}
-
-	void printResults(vector<pair<double, pair<int, int> > > &vec){
-		for (int i=0;i<vec.size();++i){
-			printResult(vec[i]);
-		}
-		cout << endl;
-	}
-
-	void printResult(pair<double, pair<int, int> >&p){
-		cout << "x index: " << p.second.first 
-			<< ", y index: " << p.second.second
-			<< ", value: " << p.first << endl;
-	}
-
-	void printResult(pair<pair<int, int>, double> &p){
-		cout << "x index: " << p.first.first 
-			<< ", y index: " << p.first.second
-			<< ", value: " << p.second << endl;
 	}
 };

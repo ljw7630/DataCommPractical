@@ -20,6 +20,7 @@ public:
 	vector<vector<double> > & getReceiverTupleArray(){
 		return Receiver_Tuple_Array;
 	}
+
 private:
 	void readFromFile(const int num, string fileName = "out.txt"){
 		ifstream fs(fileName);

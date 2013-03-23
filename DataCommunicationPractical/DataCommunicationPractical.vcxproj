@@ -81,12 +81,15 @@
     <None Include="receiver_preprocess.py">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="run.bat" />
     <None Include="X.04" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FilePrinter.h" />
     <ClCompile Include="Localization.cpp">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
     </ClCompile>
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="ReceiverReader.h" />
   </ItemGroup>
   <ItemGroup>

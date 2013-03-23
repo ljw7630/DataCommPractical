@@ -172,8 +172,9 @@ void localization ()
 	Receiver_Tuple_Array[6][5]=Yreceiver_Err2;
 	Receiver_Tuple_Array[6][6]=Mreceiver_Err2;
 #endif
-
+	
 #ifndef DISABLE
+	cout << "start reading from out.txt" << endl;
 	ReceiverReader reader(No_Residual_Surfaces);
 	vector<vector<double> > Receiver_Tuple_Array = reader.getReceiverTupleArray();
 	reader.print();
@@ -209,6 +210,10 @@ void localization ()
 	fclose(fp1);
 
 	Start=0;
+	
+	coutput1.open("E_Receiver_1.dat");
+	coutput2.open("E_Receiver_2.dat");
+	coutput3.open("Residual.dat");
 
 	// For Each Tuple (Receiver Pair
 	for(Tuple_No=0;(Tuple_No<=No_Residual_Surfaces-1)&&(Tuple_No !=6);Tuple_No++)
@@ -279,15 +284,10 @@ void localization ()
 				J[n]=(Ei_Rad(R_source_p(Xreceiver1, Yreceiver1, n))-(Sigma))/(Hself);
 			}
 
-			coutput1.open("E_Receiver_1.dat");
-
 			for(n=0;n<=No_Grps-1;n++)
 			{
-				coutput1 << x(n) << "  " << 20*log10(abs(Secondary_Source_Field_1[n])/*-sqrt(R_source_obs(Obs,Xreceiver1, Yreceiver1,n+1))*/)<< endl;
+				coutput1 << Tuple_No << " " << x(n) << "  " << Y_Index << " " << 20*log10(abs(Secondary_Source_Field_1[n])/*-sqrt(R_source_obs(Obs,Xreceiver1, Yreceiver1,n+1))*/)<< endl;
 			}
-
-			coutput1.close();
-
 
 			/********************************************************************************************************************************************
 
@@ -332,15 +332,11 @@ void localization ()
 				J[n]=(Ei_Rad(R_source_p(Xreceiver2, Yreceiver2, n))-(Sigma))/(Hself);
 			}
 
-			coutput1.open("E_Receiver_2.dat");
-
 			for(n=0;n<=No_Grps-1;n++)
 			{
 
-				coutput1 << x(n) << "  " << 20*log10(abs(Secondary_Source_Field_2[n])/*-sqrt(R_source_obs(Obs,Xreceiver2, Yreceiver2,n+1))*/) << endl;
+				coutput2 << Tuple_No << " " << x(n) << "  " << Y_Index << "  " << 20*log10(abs(Secondary_Source_Field_2[n])/*-sqrt(R_source_obs(Obs,Xreceiver2, Yreceiver2,n+1))*/) << endl;
 			}
-
-			coutput1.close();
 
 			/***********************************************************************************************************************************
 
@@ -361,14 +357,10 @@ void localization ()
 				Residual[n]=abs((Difference_Secondary_Fields_1_2[n])-(Observed_Primary_Field_Difference_1_2));
 			}
 
-			coutput3.open("Residual.dat");
-
 			for(n=0;n<=No_Grps-1;n++)
 			{
-				coutput3 << x(n) << "  " << Residual[n] << endl;
+				coutput3 << Tuple_No << " " << x(n) << "  " << Y_Index << "  " << Residual[n] << endl;
 			}
-
-			coutput3.close();
 
 			// Input Residual to  Residual SS_Surface
 
@@ -376,15 +368,6 @@ void localization ()
 			{
 				Residual_Signal_Strength_Surfaces[Tuple_No][X_Index][Y_Index]=Residual[X_Index];
 			}
-
-			coutput3.open("Residual.dat");
-
-			for(n=0;n<=No_Grps-1;n++)
-			{
-				coutput3 << x(n) << "  " << Residual[n] << endl;
-			}
-
-			coutput3.close();
 
 		} // End Y_Index (Obs)
 
