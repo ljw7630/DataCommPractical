@@ -21,6 +21,10 @@ public:
 		return Receiver_Tuple_Array;
 	}
 
+	int getReceiverPairs(){
+		return Receiver_Tuple_Array.size();
+	}
+
 private:
 	void readFromFile(const int num, string fileName = "out.txt"){
 		ifstream fs(fileName);

@@ -7,6 +7,7 @@
 #include <direct.h>
 #include <algorithm>
 #include <string>
+#include <sstream>
 using namespace std;
 
 
@@ -20,8 +21,10 @@ class FilePrinter{
 private:
 	ofstream output;
 	string folderPath;
+	int num;
 public:
-	FilePrinter(){
+	FilePrinter(int num){
+		this->num = num;
 		folderPath = makeFolder();
 		string command("copy out.txt \"");
 		command.append(folderPath);
@@ -32,6 +35,7 @@ public:
 	void writeError(string fileName, map<pair<int, int>, double> & res){
 		
 		output.open((folderPath + fileName).c_str());
+		cout << (folderPath+fileName) << endl;
 		printError(res, output);
 		output.close();
 	}
@@ -39,6 +43,7 @@ public:
 	void writeResult(string fileName, vector<pair<double, pair<int, int> > > &res){
 		
 		output.open((folderPath + fileName).c_str());
+		cout << (folderPath+fileName) << endl;
 		printResults(res, output);
 		output.close();
 	}
@@ -47,6 +52,7 @@ public:
 		double Xsource, double Ysource){
 			
 			output.open((folderPath + fileName).c_str());
+			cout << (folderPath+fileName) << endl;
 			printCorrectResult(res, Xsource, Ysource, output);
 			output.close();
 	}
@@ -54,6 +60,13 @@ public:
 private:
 	/// Random folder with timeStamp
 	string makeFolder(){
+
+		ostringstream ss;
+		ss << this->num;
+		string fullpath = ss.str();
+		fullpath.push_back('/');
+		int returnValue = makedir(fullpath.c_str(), 0777);
+
 		time_t t = time(NULL);
 		tm* lctime = localtime(&t);
 		char * cht = asctime(lctime);
@@ -61,9 +74,10 @@ private:
 		replace(s.begin(), s.end(), ':', '-');
 		s.pop_back();
 		s.push_back('/');
-		int returnValue = makedir(s.c_str(), 777);
+		fullpath.append(s);
+		returnValue = makedir(fullpath.c_str(), 0777);
 
-		return s;
+		return fullpath;
 	}
 
 	void printError(map<pair<int, int>, double> &res, ostream &out = cout){

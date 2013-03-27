@@ -373,7 +373,7 @@ void localization ()
 
 	} // End Tuple_No (Surface_No)
 	
-	Calculator calculator(No_Residual_Surfaces, No_Grps);
+	Calculator calculator(No_Residual_Surfaces, No_Grps, reader.getReceiverPairs());
 	calculator.calculate(Residual_Signal_Strength_Surfaces);
 
 } /* Main*/

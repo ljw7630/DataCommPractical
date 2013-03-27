@@ -3,7 +3,7 @@
 using namespace std;
 
 //int main(){
-//	FilePrinter  fp;
+//	FilePrinter  fp(12);
 //	
 //	return 0;
 //}
